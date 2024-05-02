@@ -2,10 +2,16 @@
 class main:
 	def clear(self):
 		self.headersOutput.delete('1.0', 'end')
+		self.curlEntry.delete('1.0', 'end')
+		self.cookiesOutput.delete('1.0', 'end')
 
 	def copy(self):
 		self.app.clipboard_clear()
-		self.app.clipboard_append(f'self.headers = {self.convertedVal}\n\nself.cookies = {self.cookieVal}')
+		if self.cookieVal is None:
+			clipboard = f'self.headers = {self.convertedVal}'
+		else:
+			clipboard = f'self.headers = {self.convertedVal}\n\nself.cookies = {self.cookieVal}'
+		self.app.clipboard_append(clipboard)
 		self.app.update()
 
 	def convert(self):
@@ -16,28 +22,35 @@ class main:
 			mode = self.mode.get()
 			match mode:
 				case 'firefox':
-					cookieHeader = "-H 'Cookie: "
 					self.convertedVal = ast.literal_eval('{' + ',\n'.join(curlVal.split(' -H ')[1:]).replace(': ', "': '") + '}')
 					if 'Cookie' in self.convertedVal:
 						self.convertedVal.pop('Cookie')
 				case 'chrome':
-					cookieHeader = "-H 'cookie: "
 					self.convertedVal = ast.literal_eval('{' + ',\n'.join(curlVal.split(' -H ')[1:]).replace(': ', "': '") + '}')
 					if 'cookie' in self.convertedVal:
 						self.convertedVal.pop('cookie')
 				case _:
 					self.convertedVal = 'WHAT??? N/AW AINT NO WAY FR FR ONG BRUH'
-
-			self.cookieVal = json.dumps(ast.literal_eval("{'" + "',\n'".join(curlVal.split(cookieHeader)[1].split(' -H ')[0].split('; ')).replace('=', "': '") + "}"), indent='\t')
+			if "-H 'cookie: " in curlVal:
+				cookieHeader = "-H 'cookie: "
+			elif "-H 'Cookie: " in curlVal:
+				cookieHeader = "-H 'Cookie: "
+			else:
+				cookieHeader = None
+			if cookieHeader is not None:
+				self.cookieVal = json.dumps(ast.literal_eval("{'" + "',\n'".join(curlVal.split(cookieHeader)[1].split(' -H ')[0].split('; ')).replace('=', "': '") + "}"), indent='\t')
+			else:
+				self.cookieVal = None
 			self.convertedVal = json.dumps(self.convertedVal, indent='\t')
 		except SyntaxError as syntaxError:
 		 	self.convertedVal = 'Error!'
 		 	self.cookieVal = 'Error!'
 
+
 		self.headersOutput.delete('1.0', 'end')
 		self.headersOutput.insert('end', self.convertedVal)
 		self.cookiesOutput.delete('1.0', 'end')
-		self.cookiesOutput.insert('end', self.cookieVal)
+		self.cookiesOutput.insert('end', str(self.cookieVal))
 
 	def __init__(self):
 		self.app = ttk.Window(themename = 'vapor')
