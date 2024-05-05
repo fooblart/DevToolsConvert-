@@ -54,7 +54,7 @@ class main:
 
 	def __init__(self):
 		self.app = ttk.Window(themename = 'vapor')
-		self.app.iconphoto(False, ttk.PhotoImage(file = '~/code/python/curl2Headers/jeff.png'))
+		#self.app.iconphoto(False, ttk.PhotoImage(file = '~/code/python/curl2Headers/jeff.png'))
 		self.app.title('Convert dev tools copy as curl to headers and cookies dictionary to be used in a python program for web scrapping etc')
 		self.app.geometry('1300x600')
 		self.app.resizable(False, False)
